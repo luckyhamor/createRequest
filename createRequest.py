@@ -52,13 +52,25 @@ def create_json():
 def toggle_server():
     global server_process, server_running
 
+    port_number = port_entry.get().strip()  # Get the port number and remove any leading/trailing whitespace
+
     if not server_running:
-        port_number = port_entry.get()
+        if not port_number:  # Check if the port number field is empty
+            messagebox.showwarning("Warning", "Please enter a port number.")
+            return  # Return early to avoid starting the server without a port
+
+        try:
+            # Try to convert the port number to an integer to check if it's a valid number
+            port = int(port_number)
+        except ValueError:
+            messagebox.showerror("Error", "Invalid port number. Please enter a numeric value.")
+            return
+
         server_process = subprocess.Popen(["dyweb", "-p", port_number, "-json", "output.json"])
         messagebox.showinfo("Success", f"Server is running on port {port_number}.")
         server_running = True
         run_server_button.config(text="Stop Server")
-        disable_fields()  
+        disable_fields()
     else:
         if server_process:
             server_process.terminate()
@@ -67,7 +79,8 @@ def toggle_server():
 
         server_running = False
         run_server_button.config(text="Run Server")
-        enable_fields()  
+        enable_fields()
+             
 
 def disable_fields():
     path_name_entry.config(state="disabled")
